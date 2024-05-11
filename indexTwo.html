@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question & Answer</title>
+</head>
+<body>
+    <h1>Question & Answer</h1>
+
+    <!-- Form to Post a New Question -->
+    <form id="postQuestionForm">
+        <label for="questionInput">Post a New Question:</label>
+        <input type="text" id="questionInput" required>
+        <button type="submit">Post Question</button>
+    </form>
+
+    <!-- Display Current Question and Answer -->
+    <div id="questionContainer">
+        <h2>Current Question:</h2>
+        <p id="questionText"></p>
+        <h2>Answer:</h2>
+        <p id="answerText"></p>
+    </div>
+
+    <!-- Form to Submit Answer -->
+    <form id="answerForm">
+        <label for="answerInput">Your Answer:</label>
+        <input type="text" id="answerInput" required>
+        <button type="submit">Submit Answer</button>
+    </form>
+
+    <script>
+        // Function to fetch the current question and answer
+        async function fetchQuestionAndAnswer() {
+            const response = await fetch('http://localhost:3000/question');
+            const data = await response.json();
+            document.getElementById('questionText').textContent = data.question;
+            document.getElementById('answerText').textContent = data.answer || 'No answer provided yet';
+        }
+
+        // Function to post a new question
+        async function postQuestion(event) {
+            event.preventDefault();
+
+            const newQuestion = document.getElementById('questionInput').value;
+
+            const response = await fetch('http://localhost:3000/question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ newQuestion })
+            });
+
+            if (response.ok) {
+                alert('Question posted successfully');
+                fetchQuestionAndAnswer(); // Refresh question and answer display
+                document.getElementById('questionInput').value = ''; // Clear input field
+            } else {
+                alert('Failed to post question');
+            }
+        }
+
+        // Function to submit an answer
+        async function submitAnswer(event) {
+            event.preventDefault();
+
+            const answer = document.getElementById('answerInput').value;
+
+            const response = await fetch('http://localhost:3000/answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ answer })
+            });
+
+            if (response.ok) {
+                alert('Answer submitted successfully');
+                fetchQuestionAndAnswer(); // Refresh question and answer display
+                document.getElementById('answerInput').value = ''; // Clear input field
+            } else {
+                alert('Failed to submit answer');
+            }
+        }
+
+        // Fetch the initial question and answer when the page loads
+        window.onload = fetchQuestionAndAnswer;
+
+        // Attach submit event listeners to forms
+        document.getElementById('postQuestionForm').addEventListener('submit', postQuestion);
+        document.getElementById('answerForm').addEventListener('submit', submitAnswer);
+    </script>
+</body>
+</html>
